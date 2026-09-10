@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Gato vs Rato - Gigante!</title>
+    <title>Gato vs Rato - Edição Tablet</title>
     <style>
         * {
             box-sizing: border-box;
@@ -13,7 +13,7 @@
         body {
             margin: 0;
             padding: 0;
-            background-color: #111;
+            background-color: #1a1a1a;
             font-family: Arial, sans-serif;
             display: flex;
             flex-direction: column;
@@ -24,65 +24,91 @@
         }
         #game-container {
             position: relative;
-            width: 100%;
-            max-width: 700px;
-            height: 350px;
-            background: linear-gradient(to bottom, #87CEEB 70%, #5c3a21 70%);
-            border: 4px solid #fff;
-            border-radius: 8px;
+            width: 95vw;
+            max-width: 900px;
+            height: 500px;
+            border: 5px solid #fff;
+            border-radius: 12px;
             overflow: hidden;
             touch-action: manipulation;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            transition: background 0.5s ease;
         }
+
+        .city-skyline {
+            position: absolute;
+            bottom: 60px;
+            left: 0;
+            width: 200%;
+            height: 200px;
+            background-repeat: repeat-x;
+            background-position: bottom left;
+            opacity: 0.85;
+            z-index: 1;
+        }
+
+        #ground {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 60px;
+            background: #4a2e18;
+            border-top: 6px solid #2d1b0e;
+            z-index: 2;
+        }
+
         #ui {
             position: absolute;
-            top: 10px;
-            left: 10px;
-            right: 10px;
+            top: 15px;
+            left: 20px;
+            right: 20px;
             display: flex;
             justify-content: space-between;
-            font-size: 16px;
+            font-size: 20px;
             font-weight: bold;
             color: #fff;
-            text-shadow: 2px 2px 4px #000;
+            text-shadow: 2px 2px 5px #000;
             z-index: 10;
         }
+
         .entity {
             position: absolute;
-            font-size: 55px; /* Tamanho do Gato e do Rato aumentados */
+            font-size: 65px;
             line-height: 1;
             transform: scaleX(-1);
             z-index: 5;
         }
         #cat {
-            bottom: 25px;
-            left: 40px;
+            bottom: 60px;
+            left: 50px;
         }
         #rat {
-            bottom: 25px;
-            left: 320px;
+            bottom: 60px;
+            left: 420px;
         }
         .obstacle {
             position: absolute;
-            bottom: 25px;
-            font-size: 45px; /* Obstáculos maiores */
+            bottom: 60px;
+            font-size: 55px;
             z-index: 4;
         }
         .lava-pit {
             position: absolute;
             bottom: 0px;
-            height: 35px;
+            height: 60px;
             background: linear-gradient(to top, #ff0000, #ff9900);
-            border-top: 4px solid #ffff00;
+            border-top: 5px solid #ffff00;
             z-index: 3;
-            box-shadow: 0 -5px 12px rgba(255, 68, 0, 0.9);
+            box-shadow: 0 -8px 15px rgba(255, 68, 0, 0.9);
         }
+
         #overlay {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.82);
+            background: rgba(0, 0, 0, 0.85);
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -90,55 +116,67 @@
             color: white;
             z-index: 20;
             text-align: center;
-            padding: 15px;
+            padding: 20px;
         }
-        #overlay h1 { margin: 0 0 10px 0; font-size: 24px; }
-        #overlay p { margin: 0 0 15px 0; font-size: 15px; }
+        #overlay h1 { margin: 0 0 10px 0; font-size: 32px; }
+        #overlay p { margin: 0 0 20px 0; font-size: 20px; }
+
         .badge {
             display: inline-block;
-            padding: 4px 10px;
-            border-radius: 4px;
-            font-size: 13px;
+            padding: 6px 14px;
+            border-radius: 6px;
+            font-size: 16px;
             font-weight: bold;
-            margin-bottom: 8px;
+            margin-bottom: 12px;
         }
         .easy { background-color: #4CAF50; }
         .hard { background-color: #f44336; }
         .extreme { background-color: #9c27b0; }
-        
-        button {
-            padding: 12px 24px;
-            font-size: 18px;
+
+        button.main-btn {
+            padding: 16px 36px;
+            font-size: 24px;
             font-weight: bold;
             background-color: #4CAF50;
             color: white;
-            border: none;
-            border-radius: 6px;
+            border: 3px solid #fff;
+            border-radius: 12px;
             cursor: pointer;
+            z-index: 30;
+            touch-action: manipulation;
         }
+        button.main-btn:active {
+            background-color: #3e8e41;
+            transform: scale(0.96);
+        }
+
         #jump-btn {
-            margin-top: 10px;
-            width: 100%;
-            max-width: 700px;
-            padding: 18px;
-            font-size: 20px;
+            margin-top: 15px;
+            width: 95vw;
+            max-width: 900px;
+            padding: 22px;
+            font-size: 24px;
             background-color: #FF9800;
             color: white;
             border: none;
-            border-radius: 8px;
+            border-radius: 12px;
             font-weight: bold;
             cursor: pointer;
-            box-shadow: 0 5px #E65100;
+            box-shadow: 0 6px #E65100;
+            touch-action: manipulation;
         }
         #jump-btn:active {
             box-shadow: 0 2px #E65100;
-            transform: translateY(3px);
+            transform: translateY(4px);
         }
     </style>
 </head>
 <body>
 
 <div id="game-container">
+    <div id="city-bg" class="city-skyline"></div>
+    <div id="ground"></div>
+
     <div id="ui">
         <span id="level-display">Fase: 1 / 15</span>
         <span id="diff-display">Fácil</span>
@@ -151,8 +189,8 @@
     <div id="overlay">
         <span id="diff-badge" class="badge easy">Fácil</span>
         <h1 id="overlay-title">Gato vs Rato</h1>
-        <p id="overlay-msg">Cuidado com os obstáculos e poços de lava gigantes!</p>
-        <button id="start-btn">JOGAR</button>
+        <p id="overlay-msg">Toque em JOGAR para começar!</p>
+        <button id="start-btn" class="main-btn">JOGAR</button>
     </div>
 </div>
 
@@ -160,6 +198,7 @@
 
 <script>
     const container = document.getElementById('game-container');
+    const cityBg = document.getElementById('city-bg');
     const cat = document.getElementById('cat');
     const rat = document.getElementById('rat');
     const levelDisplay = document.getElementById('level-display');
@@ -181,22 +220,44 @@
     let lavas = [];
     let gameLoopId;
     let obstacleSpawnerId;
+    let bgScrollPos = 0;
+
+    const citySvg = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='800' height='200' viewBox='0 0 800 200'><path d='M0,200 L0,120 L30,120 L30,200 L30,80 L80,80 L80,200 L90,200 L90,140 L120,110 L150,140 L150,200 L160,200 L160,50 L220,50 L220,200 L230,200 L230,130 L270,130 L270,200 L280,200 L280,90 L340,90 L340,200 L350,200 L350,150 L380,120 L410,150 L410,200 L420,200 L420,40 L490,40 L490,200 L500,200 L500,100 L550,100 L550,200 L560,200 L560,135 L590,105 L620,135 L620,200 L630,200 L630,70 L700,70 L700,200 L710,200 L710,110 L770,110 L770,200 L800,200' fill='rgba(0,0,0,0.35)'/><path d='M10,200 L10,130 L25,130 L25,200 M40,200 L40,90 L70,90 L70,200 M170,200 L170,60 L210,60 L210,200 M290,200 L290,100 L330,100 L330,200 M430,200 L430,50 L480,50 L480,200 M640,200 L640,80 L690,80 L690,200' fill='none' stroke='rgba(255,255,255,0.15)' stroke-width='2'/></svg>";
+    cityBg.style.backgroundImage = `url("${citySvg}")`;
+
+    const levelColors = [
+        "linear-gradient(to bottom, #87CEEB, #1E90FF)",
+        "linear-gradient(to bottom, #FF7F50, #FF4500)",
+        "linear-gradient(to bottom, #2C3E50, #000000)",
+        "linear-gradient(to bottom, #4a1508, #2b0b03)",
+        "linear-gradient(to bottom, #4B0082, #191970)",
+        "linear-gradient(to bottom, #00BFFF, #1E90FF)",
+        "linear-gradient(to bottom, #8B0000, #4a1508)",
+        "linear-gradient(to bottom, #2E8B57, #004D40)",
+        "linear-gradient(to bottom, #D2691E, #3E2723)",
+        "linear-gradient(to bottom, #4A148C, #880E4F)",
+        "linear-gradient(to bottom, #BF360C, #3E2723)",
+        "linear-gradient(to bottom, #0D47A1, #002171)",
+        "linear-gradient(to bottom, #311B92, #000000)",
+        "linear-gradient(to bottom, #E65100, #212121)",
+        "linear-gradient(to bottom, #880E4F, #000000)"
+    ];
 
     function getLevelConfig(lvl) {
         const lavaLevels = [4, 7, 9, 11, 13, 14, 15];
         const hasLava = lavaLevels.includes(lvl);
 
         let difficultyName = "Normal";
-        let speed = 4 + (lvl * 0.45);
-        let spawnRate = Math.max(800, 2200 - (lvl * 85));
+        let speed = 4.5 + (lvl * 0.5);
+        let spawnRate = Math.max(750, 2100 - (lvl * 90));
 
         if ([5, 8, 12].includes(lvl)) {
             difficultyName = "DIFÍCIL 🔥";
-            speed += 1.8;
+            speed += 2.0;
             spawnRate -= 200;
         } else if ([10, 14, 15].includes(lvl)) {
             difficultyName = "EXTREMO ☠️";
-            speed += 2.8;
+            speed += 3.0;
             spawnRate -= 350;
         }
 
@@ -210,33 +271,51 @@
     }
 
     function jump() {
-        if (isJumping || !isPlaying) return;
+        // Se o jogo estiver parado e o jogador clicar no botão de pular, inicia a fase!
+        if (!isPlaying) {
+            startLevel();
+            return;
+        }
+        if (isJumping) return;
+
         isJumping = true;
         let jumpHeight = 0;
         
         let upInterval = setInterval(() => {
-            if (jumpHeight >= 140) { // Salto mais alto para compensar o tamanho maior
+            if (jumpHeight >= 180) {
                 clearInterval(upInterval);
                 let downInterval = setInterval(() => {
                     if (jumpHeight <= 0) {
                         clearInterval(downInterval);
                         isJumping = false;
-                        cat.style.bottom = '25px';
+                        cat.style.bottom = '60px';
                     } else {
-                        jumpHeight -= 7;
-                        cat.style.bottom = (25 + jumpHeight) + 'px';
+                        jumpHeight -= 9;
+                        cat.style.bottom = (60 + jumpHeight) + 'px';
                     }
                 }, 15);
             } else {
-                jumpHeight += 9;
-                cat.style.bottom = (25 + jumpHeight) + 'px';
+                jumpHeight += 11;
+                cat.style.bottom = (60 + jumpHeight) + 'px';
             }
         }, 15);
     }
 
-    container.addEventListener('touchstart', (e) => { e.preventDefault(); jump(); });
-    container.addEventListener('mousedown', jump);
+    // Toque na tela do jogo para pular (apenas durante o jogo)
+    container.addEventListener('touchstart', (e) => {
+        if (isPlaying) {
+            e.preventDefault();
+            jump();
+        }
+    });
+
+    // Ações para o botão PULAR / SALTAR
+    jumpBtn.addEventListener('touchstart', (e) => { e.preventDefault(); jump(); });
     jumpBtn.addEventListener('click', jump);
+
+    // Ações explícitas para o botão JOGAR / TENTAR NOVAMENTE
+    startBtn.addEventListener('touchstart', (e) => { e.preventDefault(); startLevel(); });
+    startBtn.addEventListener('click', startLevel);
 
     function spawnElement() {
         if (!isPlaying) return;
@@ -245,16 +324,16 @@
         if (config.hasLava && Math.random() < 0.35) {
             const lava = document.createElement('div');
             lava.className = 'lava-pit';
-            const width = 80 + Math.random() * 50; // Poços de lava mais largos
+            const width = 100 + Math.random() * 60;
             lava.style.width = width + 'px';
-            lava.style.left = '700px';
+            lava.style.left = '900px';
             container.appendChild(lava);
             lavas.push(lava);
         } else {
             const obstacle = document.createElement('div');
             obstacle.className = 'obstacle';
             obstacle.innerText = config.types[Math.floor(Math.random() * config.types.length)];
-            obstacle.style.left = '700px';
+            obstacle.style.left = '900px';
             container.appendChild(obstacle);
             obstacles.push(obstacle);
         }
@@ -269,12 +348,14 @@
         distance -= 0.2;
         distDisplay.innerText = `Distância: ${Math.max(0, Math.ceil(distance))}m`;
 
-        const ratOffset = Math.sin(Date.now() / 80) * 10;
-        rat.style.left = (320 + ratOffset) + 'px';
+        bgScrollPos -= config.speed * 0.3;
+        cityBg.style.backgroundPosition = `${bgScrollPos}px bottom`;
+
+        const ratOffset = Math.sin(Date.now() / 80) * 12;
+        rat.style.left = (420 + ratOffset) + 'px';
 
         const catRect = cat.getBoundingClientRect();
 
-        // Atualiza Obstáculos
         for (let i = obstacles.length - 1; i >= 0; i--) {
             let obs = obstacles[i];
             let currentLeft = parseFloat(obs.style.left);
@@ -282,21 +363,20 @@
             const obsRect = obs.getBoundingClientRect();
 
             if (
-                catRect.right - 18 > obsRect.left &&
-                catRect.left + 18 < obsRect.right &&
-                catRect.bottom - 12 > obsRect.top
+                catRect.right - 25 > obsRect.left &&
+                catRect.left + 25 < obsRect.right &&
+                catRect.bottom - 15 > obsRect.top
             ) {
                 gameOver("Você colidiu com um obstáculo!");
                 return;
             }
 
-            if (currentLeft < -60) {
+            if (currentLeft < -70) {
                 obs.remove();
                 obstacles.splice(i, 1);
             }
         }
 
-        // Atualiza Lava
         for (let i = lavas.length - 1; i >= 0; i--) {
             let lava = lavas[i];
             let currentLeft = parseFloat(lava.style.left);
@@ -304,15 +384,15 @@
             const lavaRect = lava.getBoundingClientRect();
 
             if (
-                catRect.right - 20 > lavaRect.left &&
-                catRect.left + 20 < lavaRect.right &&
-                catRect.bottom >= lavaRect.top + 8
+                catRect.right - 28 > lavaRect.left &&
+                catRect.left + 28 < lavaRect.right &&
+                catRect.bottom >= lavaRect.top + 10
             ) {
                 gameOver("Você caiu na LAVA! 🔥");
                 return;
             }
 
-            if (currentLeft < -130) {
+            if (currentLeft < -160) {
                 lava.remove();
                 lavas.splice(i, 1);
             }
@@ -333,21 +413,16 @@
         
         levelDisplay.innerText = `Fase: ${level} / ${maxLevels}`;
         diffDisplay.innerText = config.difficultyName;
-        cat.style.left = '40px';
-        cat.style.bottom = '25px';
-        rat.style.left = '320px';
+        cat.style.left = '50px';
+        cat.style.bottom = '60px';
+        rat.style.left = '420px';
         
         obstacles.forEach(o => o.remove());
         lavas.forEach(l => l.remove());
         obstacles = [];
         lavas = [];
 
-        if (config.hasLava) {
-            container.style.background = "linear-gradient(to bottom, #4a1508 70%, #2b0b03 70%)";
-        } else {
-            container.style.background = "linear-gradient(to bottom, #87CEEB 70%, #5c3a21 70%)";
-        }
-
+        container.style.background = levelColors[level - 1];
         overlay.style.display = 'none';
 
         clearTimeout(obstacleSpawnerId);
@@ -360,16 +435,16 @@
         cancelAnimationFrame(gameLoopId);
         clearTimeout(obstacleSpawnerId);
 
-        let catX = 40;
+        let catX = 50;
         let catchInterval = setInterval(() => {
-            catX += 5;
+            catX += 6;
             cat.style.left = catX + 'px';
-            if (catX >= 280) {
+            if (catX >= 370) {
                 clearInterval(catchInterval);
                 
                 if (level >= maxLevels) {
                     overlayTitle.innerText = "🎉 ZEROU O JOGO! 🎉";
-                    overlayMsg.innerText = "Incrível! Você venceu todas as 15 fases e superou a lava!";
+                    overlayMsg.innerText = "Incrível! Você venceu as 15 fases!";
                     startBtn.innerText = "JOGAR NOVAMENTE";
                     level = 1;
                 } else {
@@ -404,8 +479,6 @@
             config.difficultyName.includes('DIFÍCIL') ? 'hard' : 'easy'
         );
     }
-
-    startBtn.addEventListener('click', startLevel);
 </script>
 
 </body>
