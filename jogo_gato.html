@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Gato vs Rato - Gigante!</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #111;
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+        #game-container {
+            position: relative;
+            width: 100%;
+            max-width: 700px;
+            height: 350px;
+            background: linear-gradient(to bottom, #87CEEB 70%, #5c3a21 70%);
+            border: 4px solid #fff;
+            border-radius: 8px;
+            overflow: hidden;
+            touch-action: manipulation;
+        }
+        #ui {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            right: 10px;
+            display: flex;
+            justify-content: space-between;
+            font-size: 16px;
+            font-weight: bold;
+            color: #fff;
+            text-shadow: 2px 2px 4px #000;
+            z-index: 10;
+        }
+        .entity {
+            position: absolute;
+            font-size: 55px; /* Tamanho do Gato e do Rato aumentados */
+            line-height: 1;
+            transform: scaleX(-1);
+            z-index: 5;
+        }
+        #cat {
+            bottom: 25px;
+            left: 40px;
+        }
+        #rat {
+            bottom: 25px;
+            left: 320px;
+        }
+        .obstacle {
+            position: absolute;
+            bottom: 25px;
+            font-size: 45px; /* Obstáculos maiores */
+            z-index: 4;
+        }
+        .lava-pit {
+            position: absolute;
+            bottom: 0px;
+            height: 35px;
+            background: linear-gradient(to top, #ff0000, #ff9900);
+            border-top: 4px solid #ffff00;
+            z-index: 3;
+            box-shadow: 0 -5px 12px rgba(255, 68, 0, 0.9);
+        }
+        #overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.82);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            z-index: 20;
+            text-align: center;
+            padding: 15px;
+        }
+        #overlay h1 { margin: 0 0 10px 0; font-size: 24px; }
+        #overlay p { margin: 0 0 15px 0; font-size: 15px; }
+        .badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 13px;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+        .easy { background-color: #4CAF50; }
+        .hard { background-color: #f44336; }
+        .extreme { background-color: #9c27b0; }
+        
+        button {
+            padding: 12px 24px;
+            font-size: 18px;
+            font-weight: bold;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+        #jump-btn {
+            margin-top: 10px;
+            width: 100%;
+            max-width: 700px;
+            padding: 18px;
+            font-size: 20px;
+            background-color: #FF9800;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 5px #E65100;
+        }
+        #jump-btn:active {
+            box-shadow: 0 2px #E65100;
+            transform: translateY(3px);
+        }
+    </style>
+</head>
+<body>
+
+<div id="game-container">
+    <div id="ui">
+        <span id="level-display">Fase: 1 / 15</span>
+        <span id="diff-display">Fácil</span>
+        <span id="dist-display">Distância: 100m</span>
+    </div>
+    
+    <div id="cat" class="entity">🐱</div>
+    <div id="rat" class="entity">🐭</div>
+    
+    <div id="overlay">
+        <span id="diff-badge" class="badge easy">Fácil</span>
+        <h1 id="overlay-title">Gato vs Rato</h1>
+        <p id="overlay-msg">Cuidado com os obstáculos e poços de lava gigantes!</p>
+        <button id="start-btn">JOGAR</button>
+    </div>
+</div>
+
+<button id="jump-btn">🦘 PULAR / SALTAR</button>
+
+<script>
+    const container = document.getElementById('game-container');
+    const cat = document.getElementById('cat');
+    const rat = document.getElementById('rat');
+    const levelDisplay = document.getElementById('level-display');
+    const diffDisplay = document.getElementById('diff-display');
+    const distDisplay = document.getElementById('dist-display');
+    const overlay = document.getElementById('overlay');
+    const overlayTitle = document.getElementById('overlay-title');
+    const overlayMsg = document.getElementById('overlay-msg');
+    const diffBadge = document.getElementById('diff-badge');
+    const startBtn = document.getElementById('start-btn');
+    const jumpBtn = document.getElementById('jump-btn');
+
+    let level = 1;
+    const maxLevels = 15;
+    let distance = 100;
+    let isJumping = false;
+    let isPlaying = false;
+    let obstacles = [];
+    let lavas = [];
+    let gameLoopId;
+    let obstacleSpawnerId;
+
+    function getLevelConfig(lvl) {
+        const lavaLevels = [4, 7, 9, 11, 13, 14, 15];
+        const hasLava = lavaLevels.includes(lvl);
+
+        let difficultyName = "Normal";
+        let speed = 4 + (lvl * 0.45);
+        let spawnRate = Math.max(800, 2200 - (lvl * 85));
+
+        if ([5, 8, 12].includes(lvl)) {
+            difficultyName = "DIFÍCIL 🔥";
+            speed += 1.8;
+            spawnRate -= 200;
+        } else if ([10, 14, 15].includes(lvl)) {
+            difficultyName = "EXTREMO ☠️";
+            speed += 2.8;
+            spawnRate -= 350;
+        }
+
+        return {
+            speed: speed,
+            spawnRate: spawnRate,
+            hasLava: hasLava,
+            difficultyName: difficultyName,
+            types: ['📦', '🪨', '🌵', '🛢️', '💣', '🔥'].slice(0, Math.min(6, Math.ceil(lvl / 2.5)))
+        };
+    }
+
+    function jump() {
+        if (isJumping || !isPlaying) return;
+        isJumping = true;
+        let jumpHeight = 0;
+        
+        let upInterval = setInterval(() => {
+            if (jumpHeight >= 140) { // Salto mais alto para compensar o tamanho maior
+                clearInterval(upInterval);
+                let downInterval = setInterval(() => {
+                    if (jumpHeight <= 0) {
+                        clearInterval(downInterval);
+                        isJumping = false;
+                        cat.style.bottom = '25px';
+                    } else {
+                        jumpHeight -= 7;
+                        cat.style.bottom = (25 + jumpHeight) + 'px';
+                    }
+                }, 15);
+            } else {
+                jumpHeight += 9;
+                cat.style.bottom = (25 + jumpHeight) + 'px';
+            }
+        }, 15);
+    }
+
+    container.addEventListener('touchstart', (e) => { e.preventDefault(); jump(); });
+    container.addEventListener('mousedown', jump);
+    jumpBtn.addEventListener('click', jump);
+
+    function spawnElement() {
+        if (!isPlaying) return;
+        const config = getLevelConfig(level);
+        
+        if (config.hasLava && Math.random() < 0.35) {
+            const lava = document.createElement('div');
+            lava.className = 'lava-pit';
+            const width = 80 + Math.random() * 50; // Poços de lava mais largos
+            lava.style.width = width + 'px';
+            lava.style.left = '700px';
+            container.appendChild(lava);
+            lavas.push(lava);
+        } else {
+            const obstacle = document.createElement('div');
+            obstacle.className = 'obstacle';
+            obstacle.innerText = config.types[Math.floor(Math.random() * config.types.length)];
+            obstacle.style.left = '700px';
+            container.appendChild(obstacle);
+            obstacles.push(obstacle);
+        }
+
+        obstacleSpawnerId = setTimeout(spawnElement, config.spawnRate + Math.random() * 300);
+    }
+
+    function updateGame() {
+        if (!isPlaying) return;
+        const config = getLevelConfig(level);
+
+        distance -= 0.2;
+        distDisplay.innerText = `Distância: ${Math.max(0, Math.ceil(distance))}m`;
+
+        const ratOffset = Math.sin(Date.now() / 80) * 10;
+        rat.style.left = (320 + ratOffset) + 'px';
+
+        const catRect = cat.getBoundingClientRect();
+
+        // Atualiza Obstáculos
+        for (let i = obstacles.length - 1; i >= 0; i--) {
+            let obs = obstacles[i];
+            let currentLeft = parseFloat(obs.style.left);
+            obs.style.left = (currentLeft - config.speed) + 'px';
+            const obsRect = obs.getBoundingClientRect();
+
+            if (
+                catRect.right - 18 > obsRect.left &&
+                catRect.left + 18 < obsRect.right &&
+                catRect.bottom - 12 > obsRect.top
+            ) {
+                gameOver("Você colidiu com um obstáculo!");
+                return;
+            }
+
+            if (currentLeft < -60) {
+                obs.remove();
+                obstacles.splice(i, 1);
+            }
+        }
+
+        // Atualiza Lava
+        for (let i = lavas.length - 1; i >= 0; i--) {
+            let lava = lavas[i];
+            let currentLeft = parseFloat(lava.style.left);
+            lava.style.left = (currentLeft - config.speed) + 'px';
+            const lavaRect = lava.getBoundingClientRect();
+
+            if (
+                catRect.right - 20 > lavaRect.left &&
+                catRect.left + 20 < lavaRect.right &&
+                catRect.bottom >= lavaRect.top + 8
+            ) {
+                gameOver("Você caiu na LAVA! 🔥");
+                return;
+            }
+
+            if (currentLeft < -130) {
+                lava.remove();
+                lavas.splice(i, 1);
+            }
+        }
+
+        if (distance <= 0) {
+            levelComplete();
+            return;
+        }
+
+        gameLoopId = requestAnimationFrame(updateGame);
+    }
+
+    function startLevel() {
+        isPlaying = true;
+        const config = getLevelConfig(level);
+        distance = 50 + level * 12;
+        
+        levelDisplay.innerText = `Fase: ${level} / ${maxLevels}`;
+        diffDisplay.innerText = config.difficultyName;
+        cat.style.left = '40px';
+        cat.style.bottom = '25px';
+        rat.style.left = '320px';
+        
+        obstacles.forEach(o => o.remove());
+        lavas.forEach(l => l.remove());
+        obstacles = [];
+        lavas = [];
+
+        if (config.hasLava) {
+            container.style.background = "linear-gradient(to bottom, #4a1508 70%, #2b0b03 70%)";
+        } else {
+            container.style.background = "linear-gradient(to bottom, #87CEEB 70%, #5c3a21 70%)";
+        }
+
+        overlay.style.display = 'none';
+
+        clearTimeout(obstacleSpawnerId);
+        spawnElement();
+        gameLoopId = requestAnimationFrame(updateGame);
+    }
+
+    function levelComplete() {
+        isPlaying = false;
+        cancelAnimationFrame(gameLoopId);
+        clearTimeout(obstacleSpawnerId);
+
+        let catX = 40;
+        let catchInterval = setInterval(() => {
+            catX += 5;
+            cat.style.left = catX + 'px';
+            if (catX >= 280) {
+                clearInterval(catchInterval);
+                
+                if (level >= maxLevels) {
+                    overlayTitle.innerText = "🎉 ZEROU O JOGO! 🎉";
+                    overlayMsg.innerText = "Incrível! Você venceu todas as 15 fases e superou a lava!";
+                    startBtn.innerText = "JOGAR NOVAMENTE";
+                    level = 1;
+                } else {
+                    overlayTitle.innerText = `Fase ${level} Concluída! 🐱🐭`;
+                    overlayMsg.innerText = "O gato apanhou o rato!";
+                    startBtn.innerText = `IR PARA A FASE ${level + 1}`;
+                    level++;
+                }
+                updateBadge();
+                overlay.style.display = 'flex';
+            }
+        }, 20);
+    }
+
+    function gameOver(reason) {
+        isPlaying = false;
+        cancelAnimationFrame(gameLoopId);
+        clearTimeout(obstacleSpawnerId);
+
+        overlayTitle.innerText = "Game Over! 💥";
+        overlayMsg.innerText = `${reason} (Fase ${level})`;
+        startBtn.innerText = "TENTAR NOVAMENTE";
+        updateBadge();
+        overlay.style.display = 'flex';
+    }
+
+    function updateBadge() {
+        const config = getLevelConfig(level);
+        diffBadge.innerText = config.difficultyName;
+        diffBadge.className = 'badge ' + (
+            config.difficultyName.includes('EXTREMO') ? 'extreme' :
+            config.difficultyName.includes('DIFÍCIL') ? 'hard' : 'easy'
+        );
+    }
+
+    startBtn.addEventListener('click', startLevel);
+</script>
+
+</body>
+</html>

@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Jogo do Relógio</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background-color: #0f172a;
+      color: #f8fafc;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+    }
+
+    .container {
+      background: #1e293b;
+      padding: 2rem;
+      border-radius: 16px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+      text-align: center;
+      max-width: 400px;
+      width: 100%;
+    }
+
+    h2 {
+      color: #38bdf8;
+      margin-bottom: 1rem;
+    }
+
+    .pista-box {
+      background: #334155;
+      padding: 1rem;
+      border-radius: 8px;
+      font-size: 1.1rem;
+      margin-bottom: 1.5rem;
+      min-height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Desenho do Relógio */
+    .clock {
+      width: 220px;
+      height: 220px;
+      border: 8px solid #38bdf8;
+      border-radius: 50%;
+      margin: 0 auto 1.5rem auto;
+      position: relative;
+      background: #0f172a;
+    }
+
+    .center-dot {
+      width: 12px;
+      height: 12px;
+      background: #f8fafc;
+      border-radius: 50%;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 10;
+    }
+
+    /* Ponteiros */
+    .hand {
+      position: absolute;
+      bottom: 50%;
+      left: 50%;
+      transform-origin: bottom center;
+      border-radius: 4px;
+      transition: transform 0.2s ease-in-out;
+    }
+
+    .hour-hand {
+      width: 6px;
+      height: 60px;
+      background-color: #f43f5e;
+      margin-left: -3px;
+    }
+
+    .minute-hand {
+      width: 4px;
+      height: 85px;
+      background-color: #38bdf8;
+      margin-left: -2px;
+    }
+
+    /* Controles */
+    .controls {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .control-group {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #334155;
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+    }
+
+    .btn {
+      background: #38bdf8;
+      color: #0f172a;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+      font-size: 1rem;
+    }
+
+    .btn:hover {
+      background: #7dd3fc;
+    }
+
+    .btn-submit {
+      background: #22c55e;
+      color: #ffffff;
+      width: 100%;
+      padding: 0.75rem;
+      font-size: 1.1rem;
+    }
+
+    .btn-submit:hover {
+      background: #4ade80;
+    }
+
+    .btn-back {
+      margin-top: 1rem;
+      background: transparent;
+      color: #94a3b8;
+      border: 1px solid #475569;
+    }
+
+    .btn-back:hover {
+      background: #334155;
+      color: #fff;
+    }
+
+    #feedback {
+      margin-top: 1rem;
+      font-weight: bold;
+      min-height: 24px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h2>Jogo do Relógio</h2>
+    
+    <div class="pista-box" id="pista">Carregando desafio...</div>
+
+    <div class="clock">
+      <div class="center-dot"></div>
+      <div class="hand hour-hand" id="hourHand"></div>
+      <div class="hand minute-hand" id="minuteHand"></div>
+    </div>
+
+    <div class="controls">
+      <div class="control-group">
+        <span>Horas:</span>
+        <div>
+          <button class="btn" onclick="ajustarHora(-1)">-</button>
+          <button class="btn" onclick="ajustarHora(1)">+</button>
+        </div>
+      </div>
+
+      <div class="control-group">
+        <span>Minutos:</span>
+        <div>
+          <button class="btn" onclick="ajustarMinuto(-5)">-</button>
+          <button class="btn" onclick="ajustarMinuto(5)">+</button>
+        </div>
+      </div>
+    </div>
+
+    <button class="btn btn-submit" onclick="validarResposta()">Verificar</button>
+    <div id="feedback"></div>
+
+    <button class="btn btn-back" onclick="location.href='index.html'">← Voltar ao Menu</button>
+  </div>
+
+  <!-- Lógica JavaScript inclusa diretamente no arquivo HTML -->
+  <script>
+    const desafios = [
+      { pista: "Hora do almoço em ponto!", hora: 12, minuto: 0 },
+      { pista: "Faltam 15 minutos para as 3 horas.", hora: 2, minuto: 45 },
+      { pista: "Os ponteiros formam uma linha reta vertical apontando para baixo e para cima.", hora: 6, minuto: 0 },
+      { pista: "Hora de lanchar: 4 horas e meia da tarde.", hora: 4, minuto: 30 }
+    ];
+
+    let desafioAtual = 0;
+    let horaAtual = 12;
+    let minutoAtual = 0;
+
+    function atualizarRelogio() {
+      // Ângulo dos minutos: 6 graus por minuto
+      const anguloMinuto = minutoAtual * 6;
+      // Ângulo das horas: 30 graus por hora + deslocamento proporcional dos minutos
+      const anguloHora = (horaAtual % 12) * 30 + (minutoAtual * 0.5);
+
+      document.getElementById('minuteHand').style.transform = `rotate(${anguloMinuto}deg)`;
+      document.getElementById('hourHand').style.transform = `rotate(${anguloHora}deg)`;
+    }
+
+    function carregarDesafio() {
+      document.getElementById('pista').innerText = desafios[desafioAtual].pista;
+      document.getElementById('feedback').innerText = "";
+    }
+
+    function ajustarHora(delta) {
+      horaAtual = (horaAtual + delta + 12) % 12;
+      if (horaAtual === 0) horaAtual = 12;
+      atualizarRelogio();
+    }
+
+    function ajustarMinuto(delta) {
+      minutoAtual = (minutoAtual + delta + 60) % 60;
+      atualizarRelogio();
+    }
+
+    function validarResposta() {
+      const alvo = desafios[desafioAtual];
+      const feedback = document.getElementById('feedback');
+
+      if (horaAtual === alvo.hora && minutoAtual === alvo.minuto) {
+        feedback.style.color = "#4ade80";
+        feedback.innerText = "Correto! Avançando para o próximo desafio...";
+        
+        setTimeout(() => {
+          desafioAtual = (desafioAtual + 1) % desafios.length;
+          carregarDesafio();
+        }, 1500);
+      } else {
+        feedback.style.color = "#f43f5e";
+        feedback.innerText = "Tente novamente! Preste atenção na pista.";
+      }
+    }
+
+    // Inicialização ao carregar a página
+    carregarDesafio();
+    atualizarRelogio();
+  </script>
+</body>
+</html>

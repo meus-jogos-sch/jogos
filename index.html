@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Meus Jogos</title>
+  <style>
+    /* Estilos Gerais */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background-color: #0f172a;
+      color: #f8fafc;
+      min-height: 100vh;
+      padding: 2rem 1rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    /* Título H1 */
+    h1 {
+      font-size: 2.5rem;
+      margin-bottom: 2rem;
+      color: #38bdf8;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      text-shadow: 0 0 12px rgba(56, 189, 248, 0.4);
+    }
+
+    /* Grid do Menu de Jogos */
+    .games-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 1.5rem;
+      width: 100%;
+      max-width: 1000px;
+    }
+
+    /* Estilo dos Tiles / Cartões */
+    .game-card {
+      background: #1e293b;
+      border: 2px solid #334155;
+      border-radius: 12px;
+      padding: 1.5rem;
+      text-decoration: none;
+      color: inherit;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+      cursor: pointer;
+      min-height: 180px;
+    }
+
+    .game-card:hover {
+      transform: translateY(-5px);
+      border-color: #38bdf8;
+      background: #334155;
+      box-shadow: 0 10px 15px -3px rgba(56, 189, 248, 0.2);
+    }
+
+    .game-icon {
+      font-size: 3rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .game-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: #ffffff;
+      margin-bottom: 0.5rem;
+    }
+
+    .game-desc {
+      font-size: 0.875rem;
+      color: #94a3b8;
+    }
+
+    /* Tile desativado (Espaço para futuros jogos) */
+    .game-card.disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      border-style: dashed;
+    }
+
+    .game-card.disabled:hover {
+      transform: none;
+      border-color: #334155;
+      background: #1e293b;
+      box-shadow: none;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Meus Jogos</h1>
+
+  <div class="games-grid">
+    
+    <!-- TILE 1: O Jogo do Relógio -->
+    <!-- Altere o href="jogo_relogio.html" para o caminho exato do seu arquivo -->
+    <a href="jogo_relogio.html" class="game-card">
+      <div class="game-icon">⏰</div>
+      <div class="game-title">Jogo do Relógio</div>
+      <div class="game-desc">Ajuste os ponteiros do relógio baseado nas pistas!</div>
+    </a>
+
+    <!-- TILE 2 (Exemplo para o próximo jogo) -->
+    <a href="jogo_gato.html" class="game-card">
+      <div class="game-icon">🐱</div>
+      <div class="game-title">Jogo do Gato</div>
+      <div class="game-desc">Pule e desvie dos obstáculos!</div>
+    </a>
+
+    <!-- TILE 3 (Exemplo para o próximo jogo) -->
+    <a href="#" class="game-card disabled">
+      <div class="game-icon">🧩</div>
+      <div class="game-title">Em Breve</div>
+      <div class="game-desc">Espaço reservado para o próximo projeto.</div>
+    </a>
+
+  </div>
+
+</body>
+</html>
