@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mestre do Hambúrguer</title>
+    <style>
+        :root {
+            --primary: #ff6b6b;
+            --secondary: #feca57;
+            --dark: #222f3e;
+            --light: #f1f2f6;
+            --success: #1dd1a1;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #74b9ff, #a29bfe);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            color: var(--dark);
+            overflow: hidden;
+        }
+
+        #game-container {
+            width: 800px;
+            height: 550px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .screen {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        h1 {
+            color: var(--primary);
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 0px var(--secondary);
+        }
+
+        p {
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            font-size: 1.1rem;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: transform 0.1s, background-color 0.2s;
+        }
+
+        .btn:hover {
+            background-color: #ff5252;
+            transform: scale(1.05);
+        }
+
+        /* Seleção de Personagem */
+        .char-selection {
+            display: flex;
+            gap: 40px;
+            margin-bottom: 20px;
+        }
+
+        .char-card {
+            background: var(--light);
+            border: 4px solid transparent;
+            border-radius: 15px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.2s;
+            width: 150px;
+            text-align: center;
+        }
+
+        .char-card:hover, .char-card.selected {
+            border-color: var(--primary);
+            transform: translateY(-5px);
+        }
+
+        .char-avatar {
+            font-size: 4rem;
+            margin-bottom: 10px;
+        }
+
+        /* Ecrã de Jogo */
+        #game-header {
+            background: var(--dark);
+            color: white;
+            padding: 15px 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 1.1rem;
+            font-weight: bold;
+        }
+
+        #game-body {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: #fff;
+            position: relative;
+        }
+
+        .customer-area {
+            background: #dfe6e9;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 3px dashed #b2bec3;
+        }
+
+        .customer-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .customer-avatar {
+            font-size: 3rem;
+        }
+
+        .order-bubble {
+            background: white;
+            padding: 10px 15px;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            display: flex;
+            gap: 5px;
+            align-items: center;
+            border: 2px solid var(--secondary);
+        }
+
+        .order-item {
+            font-size: 1.5rem;
+        }
+
+        .kitchen-area {
+            flex: 1;
+            display: flex;
+            padding: 20px;
+            gap: 20px;
+        }
+
+        .ingredients-panel {
+            flex: 1;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            align-content: center;
+        }
+
+        .ingredient-btn {
+            background: var(--light);
+            border: 2px solid #b2bec3;
+            border-radius: 10px;
+            padding: 15px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+            transition: background 0.2s;
+        }
+
+        .ingredient-btn:hover {
+            background: #dfe6e9;
+            border-color: var(--dark);
+        }
+
+        .assembly-panel {
+            flex: 1;
+            background: #f8f9fa;
+            border: 3px dashed #ced6e0;
+            border-radius: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            padding: 15px;
+        }
+
+        .plate {
+            width: 80%;
+            height: 30px;
+            background: #dfe4ea;
+            border-radius: 50%;
+            margin-top: auto;
+            box-shadow: 0 5px 0 #ced6e0;
+            display: flex;
+            flex-direction: column-reverse;
+            align-items: center;
+            justify-content: flex-start;
+            padding-bottom: 5px;
+            min-height: 150px;
+        }
+
+        .burger-stack {
+            font-size: 2rem;
+            line-height: 0.8rem;
+            display: flex;
+            flex-direction: column-reverse;
+            align-items: center;
+        }
+
+        .assembly-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .btn-action {
+            padding: 8px 15px;
+            border-radius: 8px;
+            border: none;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .btn-clear { background: #ff4757; color: white; }
+        .btn-serve { background: var(--success); color: white; }
+
+        .timer-bar-container {
+            width: 100%;
+            height: 8px;
+            background: #dfe6e9;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        .timer-bar {
+            height: 100%;
+            background: var(--success);
+            width: 100%;
+            transition: width 0.1s linear;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="game-container">
+        <!-- ECRÃ INICIAL -->
+        <div id="screen-start" class="screen">
+            <h1>🍔 Mestre do Hambúrguer 🍔</h1>
+            <p>Escolhe o teu vendedor para começar a aventura de 15 fases!</p>
+            
+            <div class="char-selection">
+                <div class="char-card" onclick="selectCharacter('👦', 'Leo')" id="char-boy">
+                    <div class="char-avatar">👦</div>
+                    <div><strong>Leo</strong></div>
+                </div>
+                <div class="char-card" onclick="selectCharacter('👧', 'Mia')" id="char-girl">
+                    <div class="char-avatar">👧</div>
+                    <div><strong>Mia</strong></div>
+                </div>
+            </div>
+
+            <button class="btn" id="start-btn" onclick="startGame()" disabled>Iniciar Jogo</button>
+        </div>
+
+        <!-- ECRÃ DE JOGO -->
+        <div id="screen-game" class="screen hidden" style="padding: 0;">
+            <div id="game-header">
+                <div>Fase: <span id="current-level">1</span>/15</div>
+                <div>Vendedor: <span id="vendor-name">-</span></div>
+                <div>Pontos: <span id="score">0</span></div>
+            </div>
+
+            <div id="game-body">
+                <div class="timer-bar-container">
+                    <div class="timer-bar" id="timer-bar"></div>
+                </div>
+
+                <div class="customer-area">
+                    <div class="customer-info">
+                        <div class="customer-avatar" id="customer-avatar">🧔</div>
+                        <div>
+                            <h3 id="customer-name" style="margin:0;">Cliente</h3>
+                            <small>Quero exatamente este pedido!</small>
+                        </div>
+                    </div>
+                    <div class="order-bubble" id="order-bubble">
+                        <!-- Pedido gerado aqui -->
+                    </div>
+                </div>
+
+                <div class="kitchen-area">
+                    <div class="ingredients-panel">
+                        <button class="ingredient-btn" onclick="addIngredient('🍞 Pão Cima', '🍞')"><span>🍞</span> Pão Cima</button>
+                        <button class="ingredient-btn" onclick="addIngredient('🥩 Carne', '🥩')"><span>🥩</span> Carne</button>
+                        <button class="ingredient-btn" onclick="addIngredient('🧀 Queijo', '🧀')"><span>🧀</span> Queijo</button>
+                        <button class="ingredient-btn" onclick="addIngredient('🍅 Tomate', '🍅')"><span>🍅</span> Tomate</button>
+                        <button class="ingredient-btn" onclick="addIngredient('🥬 Alface', '🥬')"><span>🥬</span> Alface</button>
+                        <button class="ingredient-btn" onclick="addIngredient('🍞 Pão Baixo', '🍞')"><span>🍞</span> Pão Baixo</button>
+                    </div>
+
+                    <div class="assembly-panel">
+                        <div style="font-weight: bold; color: #636e72;">O teu Hambúrguer:</div>
+                        <div class="plate">
+                            <div class="burger-stack" id="burger-stack"></div>
+                        </div>
+                        <div class="assembly-actions">
+                            <button class="btn-action btn-clear" onclick="clearBurger()">Limpar</button>
+                            <button class="btn-action btn-serve" onclick="serveBurger()">Servir 🚀</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ECRÃ DE FIM DE JOGO / VITÓRIA -->
+        <div id="screen-end" class="screen hidden">
+            <h1 id="end-title">Fim de Jogo!</h1>
+            <p id="end-message">Obrigado por jogar.</p>
+            <button class="btn" onclick="resetGame()">Jogar Novamente</button>
+        </div>
+    </div>
+
+    <script>
+        let selectedChar = null;
+        let selectedName = null;
+        let currentLevel = 1;
+        let score = 0;
+        
+        let currentOrder = [];
+        let playerBurger = [];
+
+        let timerInterval = null;
+        let timeLeft = 100;
+        let maxTime = 100;
+
+        const ingredientsData = {
+            '🍞 Pão Cima': '🍞',
+            '🥩 Carne': '🥩',
+            '🧀 Queijo': '🧀',
+            '🍅 Tomate': '🍅',
+            '🥬 Alface': '🥬',
+            '🍞 Pão Baixo': '🍞'
+        };
+
+        const customers = ['🧔', '👩', '👴', '👱‍♀️', '👦', '👵'];
+
+        function selectCharacter(avatar, name) {
+            selectedChar = avatar;
+            selectedName = name;
+            document.getElementById('char-boy').classList.remove('selected');
+            document.getElementById('char-girl').classList.remove('selected');
+            
+            if(name === 'Leo') document.getElementById('char-boy').classList.add('selected');
+            else document.getElementById('char-girl').classList.add('selected');
+
+            document.getElementById('start-btn').removeAttribute('disabled');
+        }
+
+        function startGame() {
+            document.getElementById('screen-start').classList.add('hidden');
+            document.getElementById('screen-game').classList.remove('hidden');
+            document.getElementById('vendor-name').innerText = `${selectedChar} ${selectedName}`;
+            currentLevel = 1;
+            score = 0;
+            startLevel();
+        }
+
+        function startLevel() {
+            document.getElementById('current-level').innerText = currentLevel;
+            document.getElementById('score').innerText = score;
+            playerBurger = [];
+            renderBurger();
+            generateOrder();
+
+            // Definir tempo consoante a fase (cada fase fica um pouco mais desafiante)
+            maxTime = Math.max(20, 35 - currentLevel * 1); 
+            timeLeft = maxTime;
+
+            clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                timeLeft -= 0.1;
+                let percentage = (timeLeft / maxTime) * 100;
+                document.getElementById('timer-bar').style.width = percentage + '%';
+
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    endGame(false);
+                }
+            }, 100);
+        }
+
+        function generateOrder() {
+            const possibleItems = ['🥩 Carne', '🧀 Queijo', '🍅 Tomate', '🥬 Alface'];
+            currentOrder = ['🍞 Pão Baixo'];
+
+            // Quantidade de recheios aumenta com o nível
+            let numRecheios = Math.min(4, Math.floor(currentLevel / 3) + 1);
+            for(let i=0; i<numRecheios; i++) {
+                let randomItem = possibleItems[Math.floor(Math.random() * possibleItems.length)];
+                currentOrder.push(randomItem);
+            }
+            currentOrder.push('🍞 Pão Cima');
+
+            // Mudar avatar do cliente aleatoriamente
+            document.getElementById('customer-avatar').innerText = customers[Math.floor(Math.random() * customers.length)];
+
+            // Renderizar balão de pedido
+            let bubble = document.getElementById('order-bubble');
+            bubble.innerHTML = '';
+            currentOrder.forEach(item => {
+                let span = document.createElement('span');
+                span.className = 'order-item';
+                span.innerText = ingredientsData[item];
+                bubble.appendChild(span);
+            });
+        }
+
+        function addIngredient(name, emoji) {
+            playerBurger.push(name);
+            renderBurger();
+        }
+
+        function clearBurger() {
+            playerBurger = [];
+            renderBurger();
+        }
+
+        function renderBurger() {
+            let stack = document.getElementById('burger-stack');
+            stack.innerHTML = '';
+            playerBurger.forEach(item => {
+                let div = document.createElement('div');
+                div.innerText = ingredientsData[item];
+                stack.appendChild(div);
+            });
+        }
+
+        function serveBurger() {
+            clearInterval(timerInterval);
+
+            // Verificar se o hambúrguer está correto
+            if (playerBurger.length === currentOrder.length && playerBurger.every((val, index) => val === currentOrder[index])) {
+                score += 100;
+                currentLevel++;
+
+                if (currentLevel > 15) {
+                    endGame(true);
+                } else {
+                    alert('🎉 Pedido correto! Avançando para a próxima fase.');
+                    startLevel();
+                }
+            } else {
+                alert('❌ Hambúrguer errado! Tenta novamente (ou perdeu tempo).');
+                // Retoma o timer se errar, ou penaliza
+                startLevel();
+            }
+        }
+
+        function endGame(won) {
+            document.getElementById('screen-game').classList.add('hidden');
+            document.getElementById('screen-end').classList.remove('hidden');
+
+            let title = document.getElementById('end-title');
+            let msg = document.getElementById('end-message');
+
+            if(won) {
+                title.innerText = '🏆 Vitória Completa!';
+                msg.innerText = `Parabéns, ${selectedName}! Completaste todas as 15 fases com uma pontuação de ${score} pontos!`;
+            } else {
+                title.innerText = '⏰ Fim do Tempo!';
+                msg.innerText = `O tempo esgotou-se na fase ${currentLevel}. Conseguiste ${score} pontos.`;
+            }
+        }
+
+        function resetGame() {
+            document.getElementById('screen-end').classList.add('hidden');
+            document.getElementById('screen-start').classList.remove('hidden');
+            document.getElementById('start-btn').setAttribute('disabled', 'true');
+            document.getElementById('char-boy').classList.remove('selected');
+            document.getElementById('char-girl').classList.remove('selected');
+        }
+    </script>
+</body>
+</html>
